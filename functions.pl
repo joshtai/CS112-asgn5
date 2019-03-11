@@ -13,6 +13,31 @@ haversine_radians( Lat1, Lon1, Lat2, Lon2, Distance ) :-
     Dist is 2 * atan2( sqrt( A ), sqrt( 1 - A )),
     Distance is Dist * 3961.
 
+
+% from graphpaths.pl
+writeallpaths( Node, Node ) :-
+   write( Node ), write( ' is ' ), write( Node ), nl.
+writeallpaths( Node, Next ) :-
+   listpath( Node, Next, [Node], List ),
+   write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
+   writepath( List ),
+   fail.
+
+writepath( [] ) :-
+   nl.
+writepath( [Head|Tail] ) :-
+   write( ' ' ), write( Head ), writepath( Tail ).
+
+listpath( Node, End, Outlist ) :-
+  listpath( Node, End, [Node], Outlist ).
+
+listpath( Node, Node, _, [Node] ).
+listpath( Node, End, Tried, [Node|List] ) :-
+  link( Node, Next ),
+  not( member( Next, Tried )),
+  listpath( Next, End, [Next|Tried], List ).
+
+
 % -------------------------------
 
 % deg to radians -> deg * pi/180
@@ -38,5 +63,15 @@ compute_arrival_time(flight(Airport1, Airport2, time(Hours, Minute)), ArrivalTim
     compute_flight_time(Airport1, Airport2, FlightTime),
     DepartTime is Hours + Minute / 60, % converts DepartTime into hours
     ArrivalTime is FlightTime + DepartTime.
+
+
+
+fly(Airport1, Airport2) :-
+    flight(Airport1, Airport2, time(Hours, Minute)),
+    %p([Time], Hour, Minute).
+    %nl, write(Airport1), write('yes'), write(Hours).
+
+
+    nl, write('depart  '), write(Airport1).
 
 % --------------------------------
