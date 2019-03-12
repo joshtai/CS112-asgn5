@@ -16,7 +16,7 @@ haversine_radians( Lat1, Lon1, Lat2, Lon2, Distance ) :-
 
 % from graphpaths.pl
 writeallpaths( Node, Node ) :-
-   write( Node ), write( ' is ' ), write( Node ), nl.
+   write( Node ), write( ' this is wrongxs ' ), write( Node ), nl.
 writeallpaths( Node, Next ) :-
    listpath( Node, Next, [Node], List ),
    write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
@@ -29,14 +29,30 @@ writepath( [Head|Tail] ) :-
    write( ' ' ), write( Head ), writepath( Tail ).
 
 listpath( Node, End, Outlist ) :-
+  write('outlist: '), write(Outlist),nl,
   listpath( Node, End, [Node], Outlist ).
 
 listpath( Node, Node, _, [Node] ).
 listpath( Node, End, Tried, [Node|List] ) :-
-  link( Node, Next ),
+  write('Node: '), write(Node),write(' End: '), write(End),write(' Tried: '), write(Tried),nl,
+  flight( Node, Next, DepartT),
+  write(' depart: '), write(DepartT),nl,
+  compute_arrival_time(flight(Node, Next, DepartT), ArrivalTime),
+  write(' arrive: '), write(ArrivalTime),nl,
   not( member( Next, Tried )),
   listpath( Next, End, [Next|Tried], List ).
 
+  % from format.pl
+  to_upper( Lower, Upper) :-
+     atom_chars( Lower, Lowerlist),
+     maplist( lower_upper, Lowerlist, Upperlist),
+     atom_chars( Upper, Upperlist).
+
+  print_trip( Action, Code, Name, time( Hour, Minute)) :-
+     to_upper( Code, Upper_code),
+     format( "%-6s  %3s  %-16s  %02d:%02d",
+             [Action, Upper_code, Name, Hour, Minute]),
+     nl.
 
 % -------------------------------
 
@@ -64,14 +80,27 @@ compute_arrival_time(flight(Airport1, Airport2, time(Hours, Minute)), ArrivalTim
     DepartTime is Hours + Minute / 60, % converts DepartTime into hours
     ArrivalTime is FlightTime + DepartTime.
 
+%check_valid(Airport1, Airport2) :-
 
+
+%case for trying to fly to the departure airport
+fly(Airport1, Airport1) :-
+    nl,
+    write('cannot fly to the same airport'), fail.
 
 fly(Airport1, Airport2) :-
+    %check_valid(Airport1, Airport2),
     flight(Airport1, Airport2, time(Hours, Minute)),
     %p([Time], Hour, Minute).
     %nl, write(Airport1), write('yes'), write(Hours).
+    airport(Airport1, Full1, _, _),
+    airport(Airport2, Full2, _, _),
 
 
-    nl, write('depart  '), write(Airport1).
+    nl,
+    print_trip( depart, Airport1, Full1, time( 9, 3)),
+    print_trip( arrive, Airport2, Full2, time( 9, 3)),
+
+    nl.
 
 % --------------------------------
