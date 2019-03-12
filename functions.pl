@@ -34,16 +34,18 @@ listpath( Node, End, Outlist ) :-
 
 listpath( Node, Node, _, [Node], CurrTime ).
 listpath( Node, End, Tried, [Node|List] , CurrTime) :-
-  CurrT is CurrTime + 1,
+
   %write('Node: '), write(Node),write(' End: '), write(End),write(' Tried: '), write(Tried),nl,
   flight( Node, Next, DepartT),
   time_to_num(DepartT, DepartTimeNum),
-  write(' depart: '), write(DepartTimeNum),nl,
-  write(' currtime: '), write(CurrTime),nl,
+  %write(' depart: '), write(DepartTimeNum),nl,
+  %write(' currtime: '), write(CurrTime),nl,
 
   compute_arrival_time(flight(Node, Next, DepartT), ArrivalTime),
   %write(' arrive: '), write(ArrivalTime),nl,
   not( member( Next, Tried )),
+  DepartTimeNum > CurrTime,
+  CurrT is ArrivalTime + 0.5,
   listpath( Next, End, [Next|Tried], List , CurrT).
 
   % from format.pl
