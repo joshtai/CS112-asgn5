@@ -45,20 +45,28 @@ listpath( Node, End, Tried, [Node|List] , CurrTime) :-
   %write(' arrive: '), write(ArrivalTime),nl,
   not( member( Next, Tried )),
   DepartTimeNum > CurrTime,
+
+
+  num_to_time(ArrivalTime, ArriveT),
+  airport(Node, Full1, _, _),
+  airport(Next, Full2, _, _),
+  print_trip( depart, Node, Full1, DepartT),
+  %print_trip( arrive, Next, Full2, ArriveT),
+  write('arrive at '), write(ArriveT), nl.
   CurrT is ArrivalTime + 0.5,
   listpath( Next, End, [Next|Tried], List , CurrT).
 
-  % from format.pl
-  to_upper( Lower, Upper) :-
-     atom_chars( Lower, Lowerlist),
-     maplist( lower_upper, Lowerlist, Upperlist),
-     atom_chars( Upper, Upperlist).
+% from format.pl
+to_upper( Lower, Upper) :-
+   atom_chars( Lower, Lowerlist),
+   maplist( lower_upper, Lowerlist, Upperlist),
+   atom_chars( Upper, Upperlist).
 
-  print_trip( Action, Code, Name, time( Hour, Minute)) :-
-     to_upper( Code, Upper_code),
-     format( "%-6s  %3s  %-16s  %02d:%02d",
-             [Action, Upper_code, Name, Hour, Minute]),
-     nl.
+print_trip( Action, Code, Name, time( Hour, Minute)) :-
+   to_upper( Code, Upper_code),
+   format( "%-6s  %3s  %-16s  %02d:%02d",
+           [Action, Upper_code, Name, Hour, Minute]),
+   nl.
 
 % -------------------------------
 
@@ -90,6 +98,10 @@ compute_arrival_time(flight(Airport1, Airport2, time(Hours, Minute)), ArrivalTim
 
 time_to_num(time(Hours, Minute), TimeNum) :-
   TimeNum is Hours + Minute / 60.
+
+num_to_time(TimeNum, time(Hours, Minute)) :-
+  Hours is floor(TimeNum / 60),
+  Minute is TimeNum mod 60.
 
 
 %case for trying to fly to the departure airport
