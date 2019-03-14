@@ -18,22 +18,38 @@ haversine_radians( Lat1, Lon1, Lat2, Lon2, Distance ) :-
 writeallpaths( Node, Node ) :-
    write( Node ), write( ' this is wrongxs ' ), write( Node ), nl.
 writeallpaths( Node, Next ) :-
-   listpath( Node, Next, [Node], List, 0 ),
-   write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
-   writepath( List ),
-   fail.
+   listpath( Node, Next, [Node], List, 0 ,Path).
+   %write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
+   %write('yes'),write(Path),nl,
+   %writepath( Path ),
 
-writepath( [] ) :-
-   nl.
-writepath( [Head|Tail] ) :-
-   write( ' ' ), write( Head ), writepath( Tail ).
+
+writepath(trip(ap1(Node,DepartT),ap2(Next,ArriveT))) :-
+    %write('Node: '), write(Node),write(' End: '), write(Next),write(' depart: '), write(DepartT),write(' arrive: '), write(ArriveT),nl,
+    airport(Node, Full1, _, _),
+    airport(Next, Full2, _, _),
+    %write('arrivalt: '), write(ArrivalTime),nl,
+    %num_to_time(ArrivalTime, ArriveT),
+    print_trip( depart, Node, Full1, DepartT),
+    print_trip( arrive, Next, Full2, ArriveT).
+writepath( [trip(ap1(Node,DepartT),ap2(Next,ArriveT))|Tail] ) :-
+    nonvar(Tail) -> writepath( Tail ),
+    writepath(trip(ap1(Node,DepartT),ap2(Next,ArriveT)));
+    writepath(trip(ap1(Node,DepartT),ap2(Next,ArriveT))).
+   %write( ' ' ), write( trip(ap1(Node,DepartT),ap2(Next,ArrivalTime)) ), nl.
+   %write('tail: '), write(Tail),nl.
+
+   %airport(Head, Full1, _, _),
+   %print_trip( depart, Head, Full1, DepartT),
+
 
 listpath( Node, End, Outlist ) :-
   write('outlist: '), write(Outlist),nl,
   listpath( Node, End, [Node], Outlist ).
 
-listpath( Node, Node, _, [Node], CurrTime ).
-listpath( Node, End, Tried, [Node|List] , CurrTime) :-
+listpath( Node, Node, _, [Node], CurrTime, Path) :-
+  writepath(Path).
+listpath( Node, End, Tried, [Node|List] , CurrTime,[Path]) :-
 
   %write('Node: '), write(Node),write(' End: '), write(End),write(' Tried: '), write(Tried),nl,
   flight( Node, Next, DepartT),
@@ -46,15 +62,16 @@ listpath( Node, End, Tried, [Node|List] , CurrTime) :-
   not( member( Next, Tried )),
   DepartTimeNum > CurrTime,
 
-
-  num_to_time(ArrivalTime, ArriveT),
-  airport(Node, Full1, _, _),
-  airport(Next, Full2, _, _),
-  print_trip( depart, Node, Full1, DepartT),
+  %num_to_time(ArrivalTime, ArriveT),
+  %airport(Node, Full1, _, _),
+  %airport(Next, Full2, _, _),
+  %print_trip( depart, Node, Full1, DepartT),
   %print_trip( arrive, Next, Full2, ArriveT),
-  write('arrive at '), write(ArriveT), nl.
+  %write('arrive at '), write(ArriveT), nl.
   CurrT is ArrivalTime + 0.5,
-  listpath( Next, End, [Next|Tried], List , CurrT).
+  num_to_time(ArrivalTime, ArriveT),
+  %write('listpath: '), write(ArrivalTime),nl,
+  listpath( Next, End, [Next|Tried], List , CurrT, [trip(ap1(Node,DepartT),ap2(Next,ArriveT))|Path]).
 
 % from format.pl
 to_upper( Lower, Upper) :-
@@ -100,28 +117,20 @@ time_to_num(time(Hours, Minute), TimeNum) :-
   TimeNum is Hours + Minute / 60.
 
 num_to_time(TimeNum, time(Hours, Minute)) :-
-  Hours is floor(TimeNum / 60),
-  Minute is TimeNum mod 60.
+    %write('timenum: '), write(TimeNum), nl,
+    Time is TimeNum * 60,
+    Timet is truncate(Time),
+    Hours is floor(Time / 60),
+    Minute is mod(Timet,60).
 
 
 %case for trying to fly to the departure airport
 fly(Airport1, Airport1) :-
     nl,
-    write('cannot fly to the same airport'), fail.
+    write('cannot fly to the same airport').
 
 fly(Airport1, Airport2) :-
-    %check_valid(Airport1, Airport2),
-    flight(Airport1, Airport2, time(Hours, Minute)),
-    %p([Time], Hour, Minute).
-    %nl, write(Airport1), write('yes'), write(Hours).
-    airport(Airport1, Full1, _, _),
-    airport(Airport2, Full2, _, _),
-
-
     nl,
-    print_trip( depart, Airport1, Full1, time( 9, 3)),
-    print_trip( arrive, Airport2, Full2, time( 9, 3)),
-
-    nl.
+    writeallpaths(Airport1, Airport2).
 
 % --------------------------------
