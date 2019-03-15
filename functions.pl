@@ -19,7 +19,7 @@ writeallpaths( Node, Node ) :- true.
    %write( Node ), write( ' this is wrongxs ' ), write( Node ), nl.
 
 writeallpaths( Node, Next ) :-
-   listpath( Node, Next, [Node], List, 0 ,Path).
+   listpath( Node, Next, [Node], _, 0 ,_).
    %write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
    %write('yes'),write(Path),nl,
    %writepath( Path ),
@@ -48,7 +48,7 @@ listpath( Node, End, Outlist ) :-
   write('outlist: '), write(Outlist),nl,
   listpath( Node, End, [Node], Outlist ).
 
-listpath( Node, Node, _, [Node], CurrTime, Path) :-
+listpath( Node, Node, _, [Node], _, Path) :-
   writepath(Path).
 listpath( Node, End, Tried, [Node|List] , CurrTime,[Path]) :-
 
