@@ -15,8 +15,9 @@ haversine_radians( Lat1, Lon1, Lat2, Lon2, Distance ) :-
 
 
 % from graphpaths.pl
-writeallpaths( Node, Node ) :-
-   write( Node ), write( ' this is wrongxs ' ), write( Node ), nl.
+writeallpaths( Node, Node ) :- true.
+   %write( Node ), write( ' this is wrongxs ' ), write( Node ), nl.
+
 writeallpaths( Node, Next ) :-
    listpath( Node, Next, [Node], List, 0 ,Path).
    %write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
@@ -124,13 +125,12 @@ num_to_time(TimeNum, time(Hours, Minute)) :-
     Minute is mod(Timet,60).
 
 
-%case for trying to fly to the departure airport
-fly(Airport1, Airport1) :-
-    nl,
-    write('cannot fly to the same airport').
+
 
 fly(Airport1, Airport2) :-
     nl,
+    var(Airport1) -> fail;
+    Airport1 == Airport2 -> write('cannot fly to the same airport'),fail;
     writeallpaths(Airport1, Airport2).
 
 % --------------------------------
