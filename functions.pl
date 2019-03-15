@@ -1,5 +1,8 @@
 % https://learnxinyminutes.com/docs/prolog/
 
+% Joseph Nguyen (jnguy243@ucsc.edu)
+% Joshua Tai (jitai@ucsc.edu)
+
 % Prolog version of not.
 not( X ) :- X, !, fail.
 not( _ ).
@@ -16,33 +19,19 @@ haversine_radians( Lat1, Lon1, Lat2, Lon2, Distance ) :-
 
 % from graphpaths.pl
 writeallpaths( Node, Node ) :- true.
-   %write( Node ), write( ' this is wrongxs ' ), write( Node ), nl.
 
 writeallpaths( Node, Next ) :-
    listpath( Node, Next, [Node], _, 0 ,_).
-   %write( Node ), write( ' to ' ), write( Next ), write( ' is ' ),
-   %write('yes'),write(Path),nl,
-   %writepath( Path ),
-
 
 writepath(trip(ap1(Node,DepartT),ap2(Next,ArriveT))) :-
-    %write('Node: '), write(Node),write(' End: '), write(Next),write(' depart: '), write(DepartT),write(' arrive: '), write(ArriveT),nl,
     airport(Node, Full1, _, _),
     airport(Next, Full2, _, _),
-    %write('arrivalt: '), write(ArrivalTime),nl,
-    %num_to_time(ArrivalTime, ArriveT),
     print_trip( depart, Node, Full1, DepartT),
     print_trip( arrive, Next, Full2, ArriveT).
 writepath( [trip(ap1(Node,DepartT),ap2(Next,ArriveT))|Tail] ) :-
     nonvar(Tail) -> writepath( Tail ),
     writepath(trip(ap1(Node,DepartT),ap2(Next,ArriveT)));
     writepath(trip(ap1(Node,DepartT),ap2(Next,ArriveT))).
-   %write( ' ' ), write( trip(ap1(Node,DepartT),ap2(Next,ArrivalTime)) ), nl.
-   %write('tail: '), write(Tail),nl.
-
-   %airport(Head, Full1, _, _),
-   %print_trip( depart, Head, Full1, DepartT),
-
 
 listpath( Node, End, Outlist ) :-
   write('outlist: '), write(Outlist),nl,
@@ -51,28 +40,15 @@ listpath( Node, End, Outlist ) :-
 listpath( Node, Node, _, [Node], _, Path) :-
   writepath(Path).
 listpath( Node, End, Tried, [Node|List] , CurrTime,[Path]) :-
-
-  %write('Node: '), write(Node),write(' End: '), write(End),write(' Tried: '), write(Tried),nl,
   flight( Node, Next, DepartT),
   time_to_num(DepartT, DepartTimeNum),
-  %write(' depart: '), write(DepartTimeNum),nl,
-  %write(' currtime: '), write(CurrTime),nl,
-
   compute_arrival_time(flight(Node, Next, DepartT), ArrivalTime),
-  %write(' arrive: '), write(ArrivalTime),nl,
   not( member( Next, Tried )),
   DepartTimeNum > CurrTime,
-
-  %num_to_time(ArrivalTime, ArriveT),
-  %airport(Node, Full1, _, _),
-  %airport(Next, Full2, _, _),
-  %print_trip( depart, Node, Full1, DepartT),
-  %print_trip( arrive, Next, Full2, ArriveT),
-  %write('arrive at '), write(ArriveT), nl.
   CurrT is ArrivalTime + 0.5,
   num_to_time(ArrivalTime, ArriveT),
-  %write('listpath: '), write(ArrivalTime),nl,
-  listpath( Next, End, [Next|Tried], List , CurrT, [trip(ap1(Node,DepartT),ap2(Next,ArriveT))|Path]).
+  listpath( Next, End, [Next|Tried], List , 
+      CurrT, [trip(ap1(Node,DepartT),ap2(Next,ArriveT))|Path]).
 
 % from format.pl
 to_upper( Lower, Upper) :-
@@ -105,32 +81,35 @@ compute_distance(Airport1, Airport2, Distance) :-
 
 compute_flight_time(Airport1, Airport2, FlightTime) :-
     compute_distance(Airport1, Airport2, Distance),
-    FlightTime is Distance / 500. % gets flight time by dividing distance to 500 mph
+    FlightTime is Distance / 500.
 
 compute_arrival_time(flight(Airport1, Airport2, time(Hours, Minute)), ArrivalTime) :-
     compute_flight_time(Airport1, Airport2, FlightTime),
     DepartTime is Hours + Minute / 60, % converts DepartTime into hours
     ArrivalTime is FlightTime + DepartTime.
 
-%check_valid(Airport1, Airport2) :-
-
 time_to_num(time(Hours, Minute), TimeNum) :-
   TimeNum is Hours + Minute / 60.
 
 num_to_time(TimeNum, time(Hours, Minute)) :-
-    %write('timenum: '), write(TimeNum), nl,
     Time is TimeNum * 60,
     Timet is truncate(Time),
     Hours is floor(Time / 60),
     Minute is mod(Timet,60).
 
-
-
-
 fly(Airport1, Airport2) :-
     nl,
     var(Airport1) -> fail;
-    Airport1 == Airport2 -> write('cannot fly to the same airport'),fail;
+    var(Airport2) -> fail;
+    Airport1 == Airport2 -> write('cannot fly to the same airport'), fail;
     writeallpaths(Airport1, Airport2).
 
+fly(Airport1, _) :-
+    write('Error: can not find airport in database.'),
+    not(airport(Airport1,_,_,_)),
+    fail.
+
+fly(_, Airport2) :-
+    not(airport(Airport2,_,_,_)),
+    fail.
 % --------------------------------
